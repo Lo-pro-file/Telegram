@@ -41,30 +41,6 @@ def inlinequery(update: Update, _) -> None:
     user = update.effective_user
 
     results: List = []
-    inline_help_dicts = [
-        {
-            "title": "Account info on Anie",
-            "description": "Look up a Telegram account in Anie database",
-            "message_text": "Click the button below to look up a person in Anie database using their Telegram ID",
-            "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
-            "keyboard": ".info ",
-        },
-        {
-            "title": "About",
-            "description": "Know about Anie",
-            "message_text": "Click the button below to get to know about Kigyo.",
-            "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
-            "keyboard": ".about ",
-        },
-        {
-            "title": "Anime",
-            "description": "Search anime and manga on AniList.co",
-            "message_text": "Click the button below to search anime and manga on AniList.co",
-            "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
-            "keyboard": ".anilist ",
-        },
-    ]
-
     inline_funcs = {
         ".spb": spb,
         ".info": inlineinfo,
@@ -75,6 +51,30 @@ def inlinequery(update: Update, _) -> None:
     if (f := query.split(" ", 1)[0]) in inline_funcs:
         inline_funcs[f](remove_prefix(query, f).strip(), update, user)
     else:
+        inline_help_dicts = [
+            {
+                "title": "Account info on Anie",
+                "description": "Look up a Telegram account in Anie database",
+                "message_text": "Click the button below to look up a person in Anie database using their Telegram ID",
+                "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
+                "keyboard": ".info ",
+            },
+            {
+                "title": "About",
+                "description": "Know about Anie",
+                "message_text": "Click the button below to get to know about Kigyo.",
+                "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
+                "keyboard": ".about ",
+            },
+            {
+                "title": "Anime",
+                "description": "Search anime and manga on AniList.co",
+                "message_text": "Click the button below to search anime and manga on AniList.co",
+                "thumb_urL": "https://telegra.ph/file/8fd1b2351135e778700a0.jpg",
+                "keyboard": ".anilist ",
+            },
+        ]
+
         for ihelp in inline_help_dicts:
             results.append(
                 article(
@@ -156,11 +156,10 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
         nation_level_present = True
 
     if nation_level_present:
-        text += ' [<a href="https://t.me/{}?start=nations">?</a>]'.format(bot.username)
+        text += f' [<a href="https://t.me/{bot.username}?start=nations">?</a>]'
 
     try:
-        spamwtc = sw.get_ban(int(user.id))
-        if spamwtc:
+        if spamwtc := sw.get_ban(int(user.id)):
             text += "<b>\n\n• SpamWatched:\n</b> Yes"
             text += f"\n• Reason: <pre>{spamwtc.reason}</pre>"
             text += "\n• Appeal at @SpamWatchSupport"
@@ -212,47 +211,41 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
     Built with ❤️ using python-telegram-bot v{str(__version__)}
     Running on Python {python_version()}
     """
-    results: list = []
     kb = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    text="Support",
-                    url=f"https://t.me/AnieSupports",
+                    text="Support", url="https://t.me/AnieSupports"
                 ),
                 InlineKeyboardButton(
-                    text="Channel",
-                    url=f"https://t.me/AnieBots",
+                    text="Channel", url="https://t.me/AnieBots"
                 ),
-                InlineKeyboardButton(
-                    text='Ping',
-                    callback_data='pingCB'
-                ),
-
+                InlineKeyboardButton(text='Ping', callback_data='pingCB'),
             ],
             [
                 InlineKeyboardButton(
-                    text="GitLab",
-                    url=f"https://www.gitlab.com/ITZ-ZAID",
+                    text="GitLab", url="https://www.gitlab.com/ITZ-ZAID"
                 ),
                 InlineKeyboardButton(
                     text="GitHub",
                     url="https://www.github.com/ITZ-ZAID",
                 ),
             ],
-        ])
+        ]
+    )
 
-    results.append(
-
-        InlineQueryResultArticle
-            (
+    results: list = [
+        InlineQueryResultArticle(
             id=str(uuid4()),
             title=f"About Anie (@{context.bot.username})",
-            input_message_content=InputTextMessageContent(about_text, parse_mode=ParseMode.MARKDOWN,
-                                                          disable_web_page_preview=True),
-            reply_markup=kb
+            input_message_content=InputTextMessageContent(
+                about_text,
+                parse_mode=ParseMode.MARKDOWN,
+                disable_web_page_preview=True,
+            ),
+            reply_markup=kb,
         )
-    )
+    ]
     update.inline_query.answer(results)
 
 
@@ -313,16 +306,15 @@ def spb(query: str, update: Update, context: CallbackContext) -> None:
         [
             [
                 InlineKeyboardButton(
-                    text="Report Error",
-                    url=f"https://t.me/AnieSupports",
+                    text="Report Error", url="https://t.me/AnieSupports"
                 ),
                 InlineKeyboardButton(
                     text="Search again",
                     switch_inline_query_current_chat=".spb ",
                 ),
-
-            ],
-        ])
+            ]
+        ]
+    )
 
     a = "the entity was not found"
     results = [
@@ -405,7 +397,7 @@ def media_query(query: str, update: Update, context: CallbackContext) -> None:
                 description = description or "N/A"
 
             if len((str(description))) > 700:
-                description = description [0:700] + "....."
+                description = f"{description[:700]}....."
 
             avgsc = data.get("averageScore") or "N/A"
             status = data.get("status") or "N/A"

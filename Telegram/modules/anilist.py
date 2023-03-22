@@ -31,7 +31,7 @@ def shorten(description, info="anilist.co"):
 def t(milliseconds: int) -> str:
     """Inputs time in milliseconds, to get beautified time,
     as string"""
-    seconds, milliseconds = divmod(int(milliseconds), 1000)
+    seconds, milliseconds = divmod(milliseconds, 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
@@ -272,8 +272,7 @@ def character(update: Update, context: CallbackContext):
         description = bs4.BeautifulSoup(f"{json['description']}", features='html.parser').text
         site_url = json.get("siteUrl")
         msg += shorten(description, site_url)
-        image = json.get("image", None)
-        if image:
+        if image := json.get("image", None):
             image = image.get("large")
             update.effective_message.reply_photo(
                 photo=image,

@@ -4,12 +4,12 @@ from Telegram import telethn, ubot2 as ubot
 
 def register(**args):
     """ Registers a new message. """
-    pattern = args.get("pattern", None)
+    pattern = args.get("pattern")
 
     r_pattern = r"^[/!.]"
 
     if pattern is not None and not pattern.startswith("(?i)"):
-        args["pattern"] = "(?i)" + pattern
+        args["pattern"] = f"(?i){pattern}"
 
     args["pattern"] = pattern.replace("^/", r_pattern, 1)
 
@@ -42,10 +42,10 @@ def userupdate(**args):
 
 def inlinequery(**args):
     """ Registers inline query. """
-    pattern = args.get("pattern", None)
+    pattern = args.get("pattern")
 
     if pattern is not None and not pattern.startswith("(?i)"):
-        args["pattern"] = "(?i)" + pattern
+        args["pattern"] = f"(?i){pattern}"
 
     def decorator(func):
         telethn.add_event_handler(func, events.InlineQuery(**args))
@@ -65,7 +65,7 @@ def callbackquery(**args):
 
 
 def haritarobot(**args):
-    pattern = args.get("pattern", None)
+    pattern = args.get("pattern")
     disable_edited = args.get("disable_edited", False)
     ignore_unsafe = args.get("ignore_unsafe", False)
     unsafe_pattern = r"^[^/!#@\$A-Za-z]"
@@ -73,7 +73,7 @@ def haritarobot(**args):
     disable_errors = args.get("disable_errors", False)
     insecure = args.get("insecure", False)
     if pattern is not None and not pattern.startswith("(?i)"):
-        args["pattern"] = "(?i)" + pattern
+        args["pattern"] = f"(?i){pattern}"
 
     if "disable_edited" in args:
         del args["disable_edited"]
@@ -90,9 +90,8 @@ def haritarobot(**args):
     if "insecure" in args:
         del args["insecure"]
 
-    if pattern:
-        if not ignore_unsafe:
-            args["pattern"] = args["pattern"].replace("^.", unsafe_pattern, 1)
+    if pattern and not ignore_unsafe:
+        args["pattern"] = args["pattern"].replace("^.", unsafe_pattern, 1)
 
     def decorator(func):
         async def wrapper(check):
@@ -112,8 +111,6 @@ def haritarobot(**args):
                 pass
             except BaseException as e:
                 print(e)
-            else:
-                pass
 
         if not disable_edited:
             ubot.add_event_handler(wrapper, events.MessageEdited(**args))

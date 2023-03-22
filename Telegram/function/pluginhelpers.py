@@ -19,15 +19,12 @@ SUPPORT_CHAT = "AnieSupports"
 
 
 def get_user(message: Message, text: str) -> [int, str, None]:
-    if text is None:
-        asplit = None
-    else:
-        asplit = text.split(" ", 1)
+    asplit = None if text is None else text.split(" ", 1)
     user_s = None
     reason_ = None
     if message.reply_to_message:
         user_s = message.reply_to_message.from_user.id
-        reason_ = text if text else None
+        reason_ = text or None
     elif asplit is None:
         return None, None
     elif len(asplit[0]) > 0:
@@ -45,10 +42,7 @@ def get_readable_time(seconds: int) -> int:
 
     while count < 4:
         count += 1
-        if count < 3:
-            remainder, result = divmod(seconds, 60)
-        else:
-            remainder, result = divmod(seconds, 24)
+        remainder, result = divmod(seconds, 60) if count < 3 else divmod(seconds, 24)
         if seconds == 0 and remainder == 0:
             break
         time_list.append(int(result))
@@ -57,7 +51,7 @@ def get_readable_time(seconds: int) -> int:
     for x in range(len(time_list)):
         time_list[x] = str(time_list[x]) + time_suffix_list[x]
     if len(time_list) == 4:
-        ping_time += time_list.pop() + ", "
+        ping_time += f"{time_list.pop()}, "
 
     time_list.reverse()
     ping_time += ":".join(time_list)
@@ -66,16 +60,16 @@ def get_readable_time(seconds: int) -> int:
 
 
 def time_formatter(milliseconds: int) -> str:
-    seconds, milliseconds = divmod(int(milliseconds), 1000)
+    seconds, milliseconds = divmod(milliseconds, 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     tmp = (
-        ((str(days) + " day(s), ") if days else "")
-        + ((str(hours) + " hour(s), ") if hours else "")
-        + ((str(minutes) + " minute(s), ") if minutes else "")
-        + ((str(seconds) + " second(s), ") if seconds else "")
-        + ((str(milliseconds) + " millisecond(s), ") if milliseconds else "")
+        (f"{str(days)} day(s), " if days else "")
+        + (f"{str(hours)} hour(s), " if hours else "")
+        + (f"{str(minutes)} minute(s), " if minutes else "")
+        + (f"{str(seconds)} second(s), " if seconds else "")
+        + (f"{str(milliseconds)} millisecond(s), " if milliseconds else "")
     )
     return tmp[:-2]
 
@@ -95,7 +89,7 @@ def humanbytes(size):
     while size > power:
         size /= power
         raised_to_pow += 1
-    return str(round(size, 2)) + " " + dict_power_n[raised_to_pow] + "B"
+    return f"{str(round(size, 2))} {dict_power_n[raised_to_pow]}B"
 
 
 async def progress(current, total, message, start, type_of_ps, file_name=None):
@@ -110,8 +104,8 @@ async def progress(current, total, message, start, type_of_ps, file_name=None):
         time_to_completion = round((total - current) / speed) * 1000
         estimated_total_time = elapsed_time + time_to_completion
         progress_str = "{0}{1} {2}%\n".format(
-            "".join(["🔴" for i in range(math.floor(percentage / 10))]),
-            "".join(["🔘" for i in range(10 - math.floor(percentage / 10))]),
+            "".join(["🔴" for _ in range(math.floor(percentage / 10))]),
+            "".join(["🔘" for _ in range(10 - math.floor(percentage / 10))]),
             round(percentage, 2),
         )
         tmp = progress_str + "{0} of {1}\nETA: {2}".format(
@@ -119,16 +113,14 @@ async def progress(current, total, message, start, type_of_ps, file_name=None):
         )
         if file_name:
             try:
-                await message.edit(
-                    "{}\n**File Name:** `{}`\n{}".format(type_of_ps, file_name, tmp)
-                )
+                await message.edit(f"{type_of_ps}\n**File Name:** `{file_name}`\n{tmp}")
             except FloodWait as e:
                 await asyncio.sleep(e.x)
             except MessageNotModified:
                 pass
         else:
             try:
-                await message.edit("{}\n{}".format(type_of_ps, tmp))
+                await message.edit(f"{type_of_ps}\n{tmp}")
             except FloodWait as e:
                 await asyncio.sleep(e.x)
             except MessageNotModified:
@@ -139,12 +131,11 @@ def get_text(message: Message) -> [None, str]:
     text_to_return = message.text
     if message.text is None:
         return None
-    if " " in text_to_return:
-        try:
-            return message.text.split(None, 1)[1]
-        except IndexError:
-            return None
-    else:
+    if " " not in text_to_return:
+        return None
+    try:
+        return message.text.split(None, 1)[1]
+    except IndexError:
         return None
 
 
@@ -246,12 +237,11 @@ def get_text(message: Message) -> [None, str]:
     text_to_return = message.text
     if message.text is None:
         return None
-    if " " in text_to_return:
-        try:
-            return message.text.split(None, 1)[1]
-        except IndexError:
-            return None
-    else:
+    if " " not in text_to_return:
+        return None
+    try:
+        return message.text.split(None, 1)[1]
+    except IndexError:
         return None
 
 
@@ -271,23 +261,20 @@ def get(chat_id: Union[str, int]) -> Union[List[User], bool]:
     if isinstance(chat_id, int):
         chat_id = str(chat_id)
 
-    if chat_id in admins:
-        return admins[chat_id]
-
-    return False
+    return admins[chat_id] if chat_id in admins else False
 
 
 async def get_administrators(chat: Chat) -> List[User]:
-    _get = get(chat.id)
-
-    if _get:
+    if _get := get(chat.id):
         return _get
-    else:
-        set(
-            chat.id,
-            [member.user for member in await chat.get_members(filter="administrators")],
-        )
-        return await get_administrators(chat)
+    set(
+        chat.id,
+        (
+            member.user
+            for member in await chat.get_members(filter="administrators")
+        ),
+    )
+    return await get_administrators(chat)
 
 
 def admins_only(func: Callable) -> Coroutine:
@@ -317,11 +304,11 @@ def capture_err(func):
             )
             error_feedback = split_limits(
                 "**ERROR** | `{}` | `{}`\n\n```{}```\n\n```{}```\n".format(
-                    0 if not message.from_user else message.from_user.id,
-                    0 if not message.chat else message.chat.id,
+                    message.from_user.id if message.from_user else 0,
+                    message.chat.id if message.chat else 0,
                     message.text or message.caption,
                     "".join(errors),
-                ),
+                )
             )
             for x in error_feedback:
                 await pbot.send_message(SUPPORT_CHAT, x)
@@ -408,10 +395,7 @@ def get_url(message_1: Message) -> Union[str, None]:
                     offset, length = entity.offset, entity.length
                     break
 
-    if offset in (None,):
-        return None
-
-    return text[offset : offset + length]
+    return None if offset in (None,) else text[offset : offset + length]
 
 
 async def fetch(url):
@@ -425,8 +409,8 @@ async def fetch(url):
 
 
 async def convert_seconds_to_minutes(seconds: int):
-    seconds = int(seconds)
-    seconds = seconds % (24 * 3600)
+    seconds = seconds
+    seconds %= 24 * 3600
     seconds %= 3600
     minutes = seconds // 60
     seconds %= 60
@@ -435,12 +419,11 @@ async def convert_seconds_to_minutes(seconds: int):
 
 async def json_object_prettify(objecc):
     dicc = objecc.__dict__
-    output = ""
-    for key, value in dicc.items():
-        if key == "pinned_message" or key == "photo" or key == "_" or key == "_client":
-            continue
-        output += f"**{key}:** `{value}`\n"
-    return output
+    return "".join(
+        f"**{key}:** `{value}`\n"
+        for key, value in dicc.items()
+        if key not in ["pinned_message", "photo", "_", "_client"]
+    )
 
 
 async def json_prettify(data):

@@ -33,9 +33,7 @@ def AssistantAdd(mystic):
                         "https://t.me/+", ""
                     )
                     await client(ImportChatInviteRequest(invitelink))
-                    await event.reply(
-                        f"Joined Successfully",
-                    )
+                    await event.reply("Joined Successfully")
                 except UserAlreadyParticipantError:
                     pass
                 except Exception as e:

@@ -56,9 +56,7 @@ def mute(update: Update, context: CallbackContext) -> str:
     message = update.effective_message
 
     user_id, reason = extract_user_and_text(message, args)
-    reply = check_user(user_id, bot, update)
-
-    if reply:
+    if reply := check_user(user_id, bot, update):
         message.reply_text(reply)
         return ""
 
@@ -79,10 +77,7 @@ def mute(update: Update, context: CallbackContext) -> str:
         bot.restrict_chat_member(chat.id, user_id, chat_permissions)
         bot.sendMessage(
             chat.id,
-            "{} was muted by {} in <b>{}</b>\n<b>Reason</b>: <code>{}</code>".format(
-                mention_html(member.user.id, member.user.first_name), mention_html(user.id, user.first_name),
-                message.chat.title, reason
-            ),
+            f"{mention_html(member.user.id, member.user.first_name)} was muted by {mention_html(user.id, user.first_name)} in <b>{message.chat.title}</b>\n<b>Reason</b>: <code>{reason}</code>",
             parse_mode=ParseMode.HTML,
         )
         return log
@@ -144,10 +139,7 @@ def unmute(update: Update, context: CallbackContext) -> str:
             pass
         bot.sendMessage(
             chat.id,
-            "{} was unmuted by {} in <b>{}</b>\n<b>Reason</b>: <code>{}</code>".format(
-                mention_html(member.user.id, member.user.first_name), mention_html(user.id, user.first_name),
-                message.chat.title, reason
-            ),
+            f"{mention_html(member.user.id, member.user.first_name)} was unmuted by {mention_html(user.id, user.first_name)} in <b>{message.chat.title}</b>\n<b>Reason</b>: <code>{reason}</code>",
             parse_mode=ParseMode.HTML,
         )
         return (
@@ -172,9 +164,7 @@ def temp_mute(update: Update, context: CallbackContext) -> str:
     message = update.effective_message
 
     user_id, reason = extract_user_and_text(message, args)
-    reply = check_user(user_id, bot, update)
-
-    if reply:
+    if reply := check_user(user_id, bot, update):
         message.reply_text(reply)
         return ""
 

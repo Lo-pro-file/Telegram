@@ -35,24 +35,19 @@ def stickerid(update: Update, context: CallbackContext):
 
 @zaid(command='getsticker')
 def getsticker(update: Update, context: CallbackContext):
-    bot = context.bot
     msg = update.effective_message
-    chat_id = update.effective_chat.id
     if msg.reply_to_message and msg.reply_to_message.sticker:
         file_id = msg.reply_to_message.sticker.file_id
         # Check if it's an animated file
         is_animated = msg.reply_to_message.sticker.is_animated
+        bot = context.bot
         # Get the file and put it into a memory buffer
         new_file = bot.get_file(file_id)
         sticker_data = new_file.download(out=BytesIO())
         # go back to the start of the buffer
         sticker_data.seek(0)
-        # Reply with the document. Telegram INSISTS on making anything
-        # that ends in .tgs become an animated sticker so we'll have to
-        # rename it to something the user should know how to handle.
-        filename = "sticker.png"
-        if is_animated:
-            filename = "animated_sticker.tgs.rename_me"
+        filename = "animated_sticker.tgs.rename_me" if is_animated else "sticker.png"
+        chat_id = update.effective_chat.id
         # Send the document
         bot.send_document(chat_id,
             document=sticker_data,
