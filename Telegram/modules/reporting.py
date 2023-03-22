@@ -76,12 +76,12 @@ def report(update: Update, context: CallbackContext) -> str:
     message = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
-    
+
     log_setting = logsql.get_chat_setting(chat.id)
     if not log_setting:
         logsql.set_chat_setting(logsql.LogChannelSettings(chat.id, True, True, True, True, True))
         log_setting = logsql.get_chat_setting(chat.id)
-        
+
     if message.sender_chat:
         admin_list = bot.getChatAdministrators(chat.id)
         reported = "Reported to admins."
@@ -212,7 +212,7 @@ def report(update: Update, context: CallbackContext) -> str:
                 except Unauthorized:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
-                    log.exception("Exception while reporting user\n{}".format(excp))
+                    log.exception(f"Exception while reporting user\n{excp}")
 
         try:
             update.effective_message.reply_sticker(
@@ -223,10 +223,7 @@ def report(update: Update, context: CallbackContext) -> str:
             reported,
             parse_mode=ParseMode.HTML,
         )
-        if not log_setting.log_report:
-            return ""
-        return msg
-
+        return msg if log_setting.log_report else ""
     return ""
 
 

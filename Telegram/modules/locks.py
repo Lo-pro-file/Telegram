@@ -153,13 +153,13 @@ def lock(update: Update, context: CallbackContext) -> str:  # sourcery no-metric
         if len(args) >= 1:
             ltype = args[0].lower()
             if ltype in LOCK_TYPES:
-                # Connection check
-                conn = connected(context.bot, update, chat, user.id, need_admin=True)
-                if conn:
+                if conn := connected(
+                    context.bot, update, chat, user.id, need_admin=True
+                ):
                     chat = dispatcher.bot.getChat(conn)
                     # chat_id = conn
                     chat_name = chat.title
-                    text = "Locked {} for non-admins in {}!".format(ltype, chat_name)
+                    text = f"Locked {ltype} for non-admins in {chat_name}!"
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
@@ -170,31 +170,20 @@ def lock(update: Update, context: CallbackContext) -> str:  # sourcery no-metric
                     chat = update.effective_chat
                     # chat_id = update.effective_chat.id
                     # chat_name = update.effective_message.chat.title
-                    text = "Locked {} for non-admins!".format(ltype)
+                    text = f"Locked {ltype} for non-admins!"
                 sql.update_lock(chat.id, ltype, locked=True)
                 send_message(update.effective_message, text, parse_mode="markdown")
 
-                return (
-                    "<b>{}:</b>"
-                    "\n#LOCK"
-                    "\n<b>Admin:</b> {}"
-                    "\nLocked <code>{}</code>.".format(
-                        html.escape(chat.title),
-                        mention_html(user.id, user.first_name),
-                        ltype,
-                    )
-                )
+                return f"<b>{html.escape(chat.title)}:</b>\n#LOCK\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\nLocked <code>{ltype}</code>."
 
             elif ltype in LOCK_CHAT_RESTRICTION:
-                # Connection check
-                conn = connected(context.bot, update, chat, user.id, need_admin=True)
-                if conn:
+                if conn := connected(
+                    context.bot, update, chat, user.id, need_admin=True
+                ):
                     chat = dispatcher.bot.getChat(conn)
                     chat_id = conn
                     chat_name = chat.title
-                    text = "Locked {} for all non-admins in {}!".format(
-                        ltype, chat_name
-                    )
+                    text = f"Locked {ltype} for all non-admins in {chat_name}!"
                 else:
                     if update.effective_message.chat.type == "private":
                         send_message(
@@ -257,13 +246,13 @@ def unlock(update: Update, context: CallbackContext) -> str:  # sourcery no-metr
     if len(args) >= 1:
         ltype = args[0].lower()
         if ltype in LOCK_TYPES:
-            # Connection check
-            conn = connected(context.bot, update, chat, user.id, need_admin=True)
-            if conn:
+            if conn := connected(
+                context.bot, update, chat, user.id, need_admin=True
+            ):
                 chat = context.bot.getChat(conn)
                 # chat_id = conn
                 chat_name = chat.title
-                text = "Unlocked {} for everyone in {}!".format(ltype, chat_name)
+                text = f"Unlocked {ltype} for everyone in {chat_name}!"
             else:
                 if update.effective_message.chat.type == "private":
                     send_message(
@@ -274,28 +263,19 @@ def unlock(update: Update, context: CallbackContext) -> str:  # sourcery no-metr
                 chat = update.effective_chat
                 # chat_id = update.effective_chat.id
                 # chat_name = update.effective_message.chat.title
-                text = "Unlocked {} for everyone!".format(ltype)
+                text = f"Unlocked {ltype} for everyone!"
             sql.update_lock(chat.id, ltype, locked=False)
             send_message(update.effective_message, text, parse_mode="markdown")
-            return (
-                "<b>{}:</b>"
-                "\n#UNLOCK"
-                "\n<b>Admin:</b> {}"
-                "\nUnlocked <code>{}</code>.".format(
-                    html.escape(chat.title),
-                    mention_html(user.id, user.first_name),
-                    ltype,
-                )
-            )
+            return f"<b>{html.escape(chat.title)}:</b>\n#UNLOCK\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\nUnlocked <code>{ltype}</code>."
 
         elif ltype in UNLOCK_CHAT_RESTRICTION:
-            # Connection check
-            conn = connected(context.bot, update, chat, user.id, need_admin=True)
-            if conn:
+            if conn := connected(
+                context.bot, update, chat, user.id, need_admin=True
+            ):
                 chat = dispatcher.bot.getChat(conn)
                 chat_id = conn
                 chat_name = chat.title
-                text = "Unlocked {} for everyone in {}!".format(ltype, chat_name)
+                text = f"Unlocked {ltype} for everyone in {chat_name}!"
             else:
                 if update.effective_message.chat.type == "private":
                     send_message(
@@ -306,7 +286,7 @@ def unlock(update: Update, context: CallbackContext) -> str:  # sourcery no-metr
                 chat = update.effective_chat
                 chat_id = update.effective_chat.id
                 # chat_name = update.effective_message.chat.title
-                text = "Unlocked {} for everyone!".format(ltype)
+                text = f"Unlocked {ltype} for everyone!"
 
             current_permission = context.bot.getChat(chat_id).permissions
             context.bot.set_chat_permissions(
@@ -319,16 +299,7 @@ def unlock(update: Update, context: CallbackContext) -> str:  # sourcery no-metr
 
             send_message(update.effective_message, text, parse_mode="markdown")
 
-            return (
-                "<b>{}:</b>"
-                "\n#UNLOCK"
-                "\n<b>Admin:</b> {}"
-                "\nUnlocked <code>{}</code>.".format(
-                    html.escape(chat.title),
-                    mention_html(user.id, user.first_name),
-                    ltype,
-                )
-            )
+            return f"<b>{html.escape(chat.title)}:</b>\n#UNLOCK\n<b>Admin:</b> {mention_html(user.id, user.first_name)}\nUnlocked <code>{ltype}</code>."
         else:
             send_message(
                 update.effective_message,
